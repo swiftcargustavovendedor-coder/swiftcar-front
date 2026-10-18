@@ -1,0 +1,220 @@
+/* Interações globais dos botões — somente CSS, sem bibliotecas. */
+.button,
+.form button,
+.admin-nav button,
+.menu-button,
+.whatsapp-fab {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transform: translateZ(0);
+  transition:
+    transform 220ms cubic-bezier(.2,.8,.2,1),
+    box-shadow 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease,
+    background-color 220ms ease;
+}
+
+.button::before,
+.form button::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -2px;
+  background: linear-gradient(110deg, transparent 20%, rgba(255,255,255,.3) 45%, transparent 70%);
+  transform: translateX(-120%) skewX(-14deg);
+  transition: transform 580ms cubic-bezier(.2,.8,.2,1);
+  pointer-events: none;
+}
+
+.button:hover::before,
+.form button:hover::before {
+  transform: translateX(120%) skewX(-14deg);
+}
+
+.button:hover,
+.form button:hover {
+  transform: translateY(-3px);
+  border-color: rgba(66,223,135,.72);
+  box-shadow: 0 12px 30px rgba(0,0,0,.3), 0 0 0 1px rgba(66,223,135,.1);
+}
+
+.button.primary:hover,
+.form button.primary:hover {
+  background: #62eda0;
+  border-color: #62eda0;
+  box-shadow: 0 14px 34px rgba(66,223,135,.24), 0 0 22px rgba(66,223,135,.16);
+}
+
+.button:active,
+.form button:active,
+.admin-nav button:active,
+.menu-button:active {
+  transform: translateY(1px) scale(.975);
+  transition-duration: 80ms;
+}
+
+.button:focus-visible,
+.form button:focus-visible,
+.admin-nav button:focus-visible,
+.menu-button:focus-visible,
+.whatsapp-fab:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+  box-shadow: 0 0 0 6px rgba(66,223,135,.3);
+}
+
+.button:disabled,
+.form button:disabled {
+  cursor: not-allowed;
+  opacity: .5;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Separa visualmente a ação principal do último campo do formulário. */
+.form > .button,
+.form > button[type="submit"],
+.form > button:not([type]) {
+  margin-top: 22px;
+}
+
+.form > .form-status {
+  margin-top: 12px;
+  min-height: 1.5em;
+}
+
+.button.danger:hover {
+  color: #fff;
+  border-color: var(--danger);
+  background: rgba(255,107,107,.14);
+  box-shadow: 0 12px 28px rgba(255,107,107,.12);
+}
+
+.admin-nav a,
+.admin-nav button,
+.main-nav a {
+  position: relative;
+  transition: color 200ms ease, background-color 200ms ease, transform 200ms ease;
+}
+
+.admin-nav a::after,
+.admin-nav button::after,
+.main-nav a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  right: 50%;
+  bottom: 3px;
+  height: 2px;
+  border-radius: 99px;
+  background: var(--green);
+  transition: left 220ms ease, right 220ms ease;
+}
+
+.admin-nav a:hover::after,
+.admin-nav button:hover::after,
+.main-nav a:hover::after,
+.main-nav a.active::after {
+  left: 10%;
+  right: 10%;
+}
+
+.admin-nav a:hover,
+.admin-nav button:hover {
+  color: var(--text);
+  background: rgba(255,255,255,.035);
+  transform: translateY(-1px);
+}
+
+.menu-button:hover {
+  color: var(--green);
+  transform: scale(1.08) rotate(2deg);
+}
+
+.whatsapp-fab {
+  animation: whatsapp-breathe 2.8s ease-in-out infinite;
+}
+
+.whatsapp-fab::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -7px;
+  border: 1px solid rgba(66,223,135,.55);
+  border-radius: inherit;
+  animation: whatsapp-ring 2.8s ease-out infinite;
+}
+
+.whatsapp-fab:hover {
+  transform: translateY(-3px);
+  background: #62eda0;
+  box-shadow: 0 16px 36px rgba(66,223,135,.32);
+  animation-play-state: paused;
+}
+
+.vehicle-card .button {
+  transition:
+    transform 220ms cubic-bezier(.2,.8,.2,1),
+    box-shadow 220ms ease,
+    background-color 220ms ease;
+}
+
+@keyframes whatsapp-breathe {
+  0%, 100% { box-shadow: 0 10px 30px rgba(66,223,135,.2); }
+  50% { box-shadow: 0 13px 38px rgba(66,223,135,.42); }
+}
+
+@keyframes whatsapp-ring {
+  0%, 25% { opacity: 0; transform: scale(.82); }
+  45% { opacity: .7; }
+  85%, 100% { opacity: 0; transform: scale(1.34); }
+}
+
+@media (max-width: 700px) {
+  .main-nav {
+    align-items: center;
+  }
+
+  .main-nav a {
+    width: fit-content;
+    padding-inline: 0;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .main-nav a:hover::after {
+    left: 50%;
+    right: 50%;
+  }
+
+  .main-nav a.active::after {
+    left: 0;
+    right: 0;
+  }
+
+  .button:hover,
+  .form button:hover {
+    transform: none;
+  }
+
+  .button,
+  .form button {
+    min-height: 50px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .form button,
+  .admin-nav a,
+  .admin-nav button,
+  .main-nav a,
+  .menu-button,
+  .whatsapp-fab,
+  .whatsapp-fab::before {
+    animation: none !important;
+    transition-duration: .01ms !important;
+  }
+}

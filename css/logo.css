@@ -1,0 +1,55 @@
+/* Logotipo principal: dimensões fluidas e proporção original preservada. */
+.header-logo {
+  display: flex;
+  align-items: center;
+  width: clamp(205px, 20vw, 260px);
+  height: 66px;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+.header-logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 66px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.footer-logo {
+  display: inline-flex;
+  align-items: center;
+  width: clamp(175px, 18vw, 225px);
+  height: 64px;
+  overflow: hidden;
+}
+
+.footer-logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 64px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+@media (max-width: 700px) {
+  .header-logo {
+    width: 190px;
+    height: 56px;
+  }
+
+  .header-logo img {
+    max-height: 56px;
+  }
+
+  .footer-logo {
+    width: 185px;
+    height: 56px;
+  }
+
+  .footer-logo img {
+    max-height: 56px;
+  }
+}

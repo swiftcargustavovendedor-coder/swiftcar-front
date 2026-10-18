@@ -1,0 +1,9 @@
+{
+  "name": "swiftcar-frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bun scripts/build.js",
+    "check": "bun scripts/check.js"
+  }
+}

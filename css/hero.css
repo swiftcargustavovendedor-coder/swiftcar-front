@@ -1,0 +1,45 @@
+.hero::before {
+  background-image: url("/images/swiftcar-hero-showroom.png");
+  background-position: center center;
+  background-size: cover;
+}
+
+.hero::after {
+  background:
+    linear-gradient(90deg, rgba(4, 7, 6, .94) 0%, rgba(4, 7, 6, .78) 42%, rgba(4, 7, 6, .18) 78%),
+    linear-gradient(0deg, rgba(4, 7, 6, .58), transparent 45%);
+}
+
+/* Hero principal: conteúdo alinhado à mesma margem da logo. */
+.hero-copy {
+  max-width: none;
+}
+
+.hero .eyebrow,
+.hero .trust-row {
+  display: none;
+}
+
+/* Remove os subtítulos verdes das seções da página inicial. */
+.hero ~ .section .eyebrow {
+  display: none;
+}
+
+.hero h1 {
+  max-width: 720px;
+  margin-top: 0;
+  font-size: clamp(2.65rem, 5.4vw, 5rem);
+  line-height: 1;
+  letter-spacing: -.055em;
+}
+
+@media (max-width: 700px) {
+  .hero::before { background-position: 64% center; }
+  .hero::after {
+    background: linear-gradient(0deg, rgba(4, 7, 6, .97) 0%, rgba(4, 7, 6, .78) 58%, rgba(4, 7, 6, .45));
+  }
+
+  .hero h1 {
+    font-size: clamp(2.55rem, 12vw, 4rem);
+  }
+}

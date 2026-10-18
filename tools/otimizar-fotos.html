@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Swiftcar | Otimizar fotos antigas</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+    <style>
+      #log { white-space: pre-wrap; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; font-size: .82rem; max-height: 60vh; overflow: auto; }
+      .check { display: flex; gap: 10px; align-items: center; margin: 12px 0; }
+    </style>
+  </head>
+  <body>
+    <!-- Ferramenta local, executada uma única vez. Não é copiada para dist/ e não vai para a Vercel. -->
+    <main class="section">
+      <div class="container" style="max-width:760px">
+        <p class="eyebrow">Swiftcar Admin</p>
+        <h1>Otimizar fotos antigas</h1>
+        <p class="muted">Converte as fotos de veículos enviadas antes da otimização: gera uma versão reduzida e uma miniatura, atualiza o registro em <code>vehicle_images</code> e, se marcado, exclui o arquivo original. Cada foto antiga é baixada uma única vez.</p>
+        <form id="tool-form" class="panel form">
+          <label class="field"><span>E-mail do administrador *</span><input class="input" name="email" type="email" required autocomplete="email" /></label>
+          <label class="field"><span>Senha *</span><input class="input" name="password" type="password" required autocomplete="current-password" /></label>
+          <label class="check"><input type="checkbox" name="delete_originals" /> <span>Excluir os arquivos originais depois de converter (libera espaço no Storage)</span></label>
+          <button class="button primary" type="submit">Analisar e otimizar</button>
+        </form>
+        <p></p>
+        <div id="log" aria-live="polite">Aguardando login.</div>
+      </div>
+    </main>
+    <script type="module">
+      import { IMAGE_CACHE_CONTROL, THUMB_MAX_SIDE, optimizeImage, thumbPath } from "/js/image-optimizer.js";
+
+      const logBox = document.querySelector("#log");
+      const log = message => { logBox.textContent += `\n${message}`; logBox.scrollTop = logBox.scrollHeight; };
+      const kb = bytes => `${Math.round(bytes / 1024)} KB`;
+
+      // Lê a configuração pública (URL e Publishable Key) do próprio index.html para não duplicá-la.
+      const page = await (await fetch("/index.html")).text();
+      const apiBase = page.match(/apiBase:\s*"([^"]+)"/)?.[1]?.replace(/\/$/, "");
+      const apiKey = page.match(/apiKey:\s*"([^"]+)"/)?.[1];
+      if (!apiBase || !apiKey) logBox.textContent = "Configuração do Supabase não encontrada em index.html.";
+
+      async function request(path, { method = "GET", token, body, headers = {} } = {}) {
+        const response = await fetch(`${apiBase}${path}`, {
+          method,
+          headers: { apikey: apiKey, ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(body && !(body instanceof Blob) ? { "Content-Type": "application/json" } : {}), ...headers },
+          body: body instanceof Blob ? body : body === undefined ? undefined : JSON.stringify(body)
+        });
+        if (!response.ok) {
+          let data = {};
+          try { data = await response.json(); } catch {}
+          throw new Error(data.message || data.error_description || data.error || `HTTP ${response.status}`);
+        }
+        const text = await response.text();
+        return text ? JSON.parse(text) : null;
+      }
+
+      const uploadObject = (token, path, blob) => request(`/storage/v1/object/vehicle-images/${path}`, { method: "POST", token, body: blob, headers: { "Content-Type": blob.type, "Cache-Control": IMAGE_CACHE_CONTROL, "x-upsert": "false" } });
+      const removeObjects = (token, prefixes) => request("/storage/v1/object/vehicle-images", { method: "DELETE", token, body: { prefixes } });
+
+      document.querySelector("#tool-form").onsubmit = async event => {
+        event.preventDefault();
+        const form = event.currentTarget, button = form.querySelector("button"), data = Object.fromEntries(new FormData(form));
+        button.disabled = true;
+        logBox.textContent = "Entrando...";
+        try {
+          const session = await request("/auth/v1/token?grant_type=password", { method: "POST", body: { email: data.email, password: data.password } });
+          const token = session.access_token;
+          const roles = await request(`/rest/v1/user_roles?select=role&user_id=eq.${session.user.id}&role=eq.admin`, { token });
+          if (!roles.length) throw new Error("Esta conta não possui permissão administrativa.");
+
+          const images = await request("/rest/v1/vehicle_images?select=id,vehicle_id,storage_path&order=vehicle_id.asc", { token });
+          const legacy = images.filter(image => image.storage_path && !/^https?:\/\//i.test(image.storage_path) && thumbPath(image.storage_path) === image.storage_path);
+          log(`${images.length} foto(s) cadastrada(s); ${legacy.length} ainda sem otimização.`);
+          if (!legacy.length) { log("Nada a fazer."); return; }
+          if (!confirm(`Otimizar ${legacy.length} foto(s) agora?${data.delete_originals ? " Os originais serão excluídos depois de cada conversão." : ""}`)) { log("Cancelado."); return; }
+
+          let before = 0, after = 0, done = 0, failed = 0;
+          for (const image of legacy) {
+            const label = `[${done + failed + 1}/${legacy.length}] ${image.storage_path}`;
+            let created = [];
+            try {
+              const original = await fetch(`${apiBase}/storage/v1/object/public/vehicle-images/${image.storage_path.split("/").map(encodeURIComponent).join("/")}`, { cache: "no-store" });
+              if (!original.ok) throw new Error(`download HTTP ${original.status}`);
+              const blob = await original.blob();
+              const { photo, thumb, extension } = await optimizeImage(blob, { thumbSide: THUMB_MAX_SIDE });
+              const path = `${image.vehicle_id}/${crypto.randomUUID()}.opt.${extension}`;
+              await uploadObject(token, thumbPath(path), thumb); created.push(thumbPath(path));
+              await uploadObject(token, path, photo); created.push(path);
+              const updated = await request(`/rest/v1/vehicle_images?id=eq.${image.id}`, { method: "PATCH", token, body: { storage_path: path }, headers: { Prefer: "return=representation" } });
+              if (!updated?.length) throw new Error("o banco não permitiu atualizar vehicle_images (verifique a política de UPDATE para administradores)");
+              created = [];
+              if (data.delete_originals) await removeObjects(token, [image.storage_path]);
+              before += blob.size; after += photo.size + thumb.size; done++;
+              log(`${label}: ${kb(blob.size)} → ${kb(photo.size)} + miniatura ${kb(thumb.size)}`);
+            } catch (error) {
+              failed++;
+              if (created.length) await removeObjects(token, created).catch(() => {});
+              log(`${label}: FALHOU — ${error.message}. O registro original foi mantido.`);
+            }
+          }
+          log(`\nConcluído: ${done} convertida(s), ${failed} com falha. Tamanho antes: ${kb(before)}; depois: ${kb(after)}.`);
+        } catch (error) {
+          log(`Erro: ${error.message}`);
+        } finally {
+          button.disabled = false;
+        }
+      };
+    </script>
+  </body>
+</html>

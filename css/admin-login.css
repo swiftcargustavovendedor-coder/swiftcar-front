@@ -1,0 +1,31 @@
+body.admin-auth-page{min-height:100svh;background:#10151b}
+body.admin-auth-page .site-header{position:absolute;width:100%;border:0;background:transparent;backdrop-filter:none}
+body.admin-auth-page .header-inner{min-height:96px}
+body.admin-auth-page .main-nav,body.admin-auth-page .menu-button,body.admin-auth-page .site-footer,body.admin-auth-page .whatsapp-fab{display:none!important}
+body.admin-panel-page .main-nav,body.admin-panel-page .menu-button,body.admin-panel-page .whatsapp-fab{display:none!important}
+body.admin-auth-page main{min-height:100svh;display:grid;place-items:center;padding:112px 20px 42px}
+body.admin-auth-page main>.section{width:100%;padding:0}
+body.admin-auth-page main>.section>.container{max-width:410px!important}
+.auth-enhanced{padding:28px 25px!important;border-radius:15px;background:#14191f}
+.auth-enhanced .eyebrow{display:flex;align-items:center;gap:10px;color:var(--text);font-size:1.05rem;letter-spacing:0;text-transform:none}
+.auth-enhanced .eyebrow>span{font-weight:850}
+.auth-enhanced .eyebrow>span>span{color:var(--green)}
+.auth-enhanced .eyebrow svg{width:22px;height:22px;fill:none;stroke:var(--green);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.auth-enhanced h1{margin:16px 0 2px;font-size:1.65rem;line-height:1.2}
+.auth-subtitle{margin:0 0 26px;color:var(--muted);font-size:.82rem}
+.auth-enhanced .field{margin-top:14px}
+.auth-enhanced .field span{font-size:.78rem;color:#b7c0bc}
+.auth-enhanced .input{min-height:43px}
+.auth-enhanced>.button{width:100%;margin-top:20px}
+.auth-enhanced>a{display:block;margin-top:14px;text-align:center;color:var(--muted);font-size:.78rem}
+.auth-enhanced>a:hover{color:var(--green)}
+.email-verification-note{display:flex;align-items:flex-start;justify-content:center;gap:7px;margin:16px 0 0;color:var(--muted);font-size:.73rem;text-align:center}
+.email-verification-note svg{flex:0 0 auto;width:15px;height:15px;fill:none;stroke:var(--green);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.auth-enhanced .form-status{color:#efb36b;font-size:.78rem;text-align:center}
+.first-access-link,.back-to-login{display:block;width:100%;margin:10px 0 0;padding:5px;border:0;background:transparent;color:var(--muted);font-size:.76rem;cursor:pointer}
+.first-access-link:hover,.back-to-login:hover{color:var(--green)}
+.first-access-container{max-width:430px!important}
+.first-access-success{text-align:center}
+.first-access-success h2{color:var(--green)}
+.first-access-success .button{margin-top:16px}
+@media(max-width:700px){body.admin-auth-page .header-logo{width:175px}.auth-enhanced{padding:24px 20px!important}body.admin-auth-page main{padding-top:100px}}

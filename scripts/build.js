@@ -1,0 +1,2 @@
+import { mkdir, rm, cp } from "node:fs/promises";
+await rm("dist",{recursive:true,force:true});await mkdir("dist",{recursive:true});await mkdir("dist/js",{recursive:true});await cp("index.html","dist/index.html");await cp("css","dist/css",{recursive:true});for(const file of ["site.js","image-optimizer.js","inventory.js","stock-enhancements.js"])await cp(`js/${file}`,`dist/js/${file}`);await cp("public","dist",{recursive:true});await cp("images","dist/images",{recursive:true});console.log("Build concluído em dist/ com integração Supabase.");
